@@ -4,12 +4,12 @@ use wgpu::*;
 use winit::window::Window;
 
 pub struct Renderer {
-    instance: Instance,
-    window: Rc<Window>,
-    surface: Surface<'static>,
-    surface_config: SurfaceConfiguration,
-    device: Device,
-    queue: Queue,
+    pub instance: Instance,
+    pub window: Rc<Window>,
+    pub surface: Surface<'static>,
+    pub surface_config: SurfaceConfiguration,
+    pub device: Device,
+    pub queue: Queue,
 }
 impl Renderer {
     pub fn from_window(window: Rc<Window>) -> Self {

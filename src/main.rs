@@ -4,6 +4,8 @@ use crate::app_handler::AppHandler;
 mod app_handler;
 mod application;
 mod renderer;
+mod voxel_pipeline;
+mod depth_texture;
 
 fn main() {
     let mut app_handler = AppHandler::default();
