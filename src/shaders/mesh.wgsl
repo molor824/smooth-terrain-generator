@@ -1,5 +1,5 @@
 struct VertexOut {
-    @builtin(location) clip_position: vec3<f32>,
+    @builtin(position) clip_position: vec4<f32>,
     @location(0) color: vec4<f32>,
 };
 
@@ -11,8 +11,8 @@ struct VertexIn {
 @vertex
 fn vertex_main(input: VertexIn) -> VertexOut {
     var out: VertexOut;
-    out.clip_position = input.position;
-    out.color = input.color;
+    out.clip_position = vec4<f32>(input.position, 1.0);
+    out.color = vec4<f32>(input.color, 1.0);
 
     return out;
 }

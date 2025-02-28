@@ -1,4 +1,3 @@
-use crate::depth_texture::DepthTexture;
 use crate::renderer::Renderer;
 use wgpu::*;
 
@@ -34,7 +33,7 @@ impl MeshPipeline {
                 layout: Some(&layout),
                 cache: None,
                 depth_stencil: Some(DepthStencilState {
-                    format: DepthTexture::FORMAT,
+                    format: Renderer::DEPTH_TEXTURE_FORMAT,
                     depth_compare: CompareFunction::Less,
                     depth_write_enabled: true,
                     bias: Default::default(),
@@ -57,7 +56,7 @@ impl MeshPipeline {
                     cull_mode: Some(Face::Back),
                     front_face: FrontFace::Ccw,
                     polygon_mode: PolygonMode::Fill,
-                    strip_index_format: Some(IndexFormat::Uint16),
+                    strip_index_format: None,
                     topology: PrimitiveTopology::TriangleList,
                     unclipped_depth: false,
                 },

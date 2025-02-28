@@ -3,7 +3,6 @@ use winit::event_loop::{ControlFlow, EventLoop};
 
 mod app_handler;
 mod application;
-mod depth_texture;
 mod renderer;
 mod mesh_pipeline;
 mod mesh;
