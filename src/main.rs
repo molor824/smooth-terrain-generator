@@ -3,10 +3,9 @@ use winit::event_loop::{ControlFlow, EventLoop};
 
 mod app_handler;
 mod application;
-mod renderer;
-mod mesh_pipeline;
 mod mesh;
-mod bytes;
+mod mesh_pipeline;
+mod renderer;
 
 fn main() {
     let mut app_handler = AppHandler::default();

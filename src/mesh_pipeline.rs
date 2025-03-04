@@ -3,9 +3,26 @@ use wgpu::*;
 
 pub struct MeshPipeline {
     pub internal: RenderPipeline,
+    pub color_bind_group_layout: BindGroupLayout,
 }
 impl MeshPipeline {
     pub fn new(renderer: &Renderer) -> Self {
+        let color_bind_group_layout =
+            renderer
+                .device
+                .create_bind_group_layout(&BindGroupLayoutDescriptor {
+                    label: Some("Mesh pipeline color bind group layout"),
+                    entries: &[BindGroupLayoutEntry {
+                        binding: 0,
+                        count: None,
+                        visibility: ShaderStages::FRAGMENT,
+                        ty: BindingType::Buffer {
+                            ty: BufferBindingType::Uniform,
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                    }],
+                });
         let shader_module = renderer
             .device
             .create_shader_module(include_wgsl!("shaders/mesh.wgsl"));
@@ -13,7 +30,7 @@ impl MeshPipeline {
             .device
             .create_pipeline_layout(&PipelineLayoutDescriptor {
                 label: Some("Mesh pipeline layout"),
-                bind_group_layouts: &[],
+                bind_group_layouts: &[&color_bind_group_layout],
                 push_constant_ranges: &[],
             });
         let pipeline = renderer
@@ -23,7 +40,7 @@ impl MeshPipeline {
                 vertex: VertexState {
                     buffers: &[VertexBufferLayout {
                         attributes: &vertex_attr_array![0 => Float32x3],
-                        array_stride: 0,
+                        array_stride: size_of::<[f32; 3]>() as _,
                         step_mode: VertexStepMode::Vertex,
                     }],
                     entry_point: Some("vertex_main"),
@@ -45,7 +62,7 @@ impl MeshPipeline {
                     entry_point: Some("fragment_main"),
                     targets: &[Some(ColorTargetState {
                         format: renderer.surface_config.format,
-                        blend: Some(BlendState::ALPHA_BLENDING),
+                        blend: Some(BlendState::REPLACE),
                         write_mask: ColorWrites::all(),
                     })],
                 }),
@@ -62,7 +79,10 @@ impl MeshPipeline {
                 },
             });
 
-        Self { internal: pipeline }
+        Self {
+            internal: pipeline,
+            color_bind_group_layout,
+        }
     }
     pub fn prepare(&self, render_pass: &mut RenderPass) {
         render_pass.set_pipeline(&self.internal);

@@ -14,6 +14,22 @@ pub struct Renderer {
 }
 impl Renderer {
     pub const DEPTH_TEXTURE_FORMAT: TextureFormat = TextureFormat::Depth32Float;
+    fn create_depth_texture(device: &Device, surface_config: &SurfaceConfiguration) -> Texture {
+        device.create_texture(&TextureDescriptor {
+            label: Some("Depth texture"),
+            usage: TextureUsages::RENDER_ATTACHMENT | TextureUsages::TEXTURE_BINDING,
+            format: Self::DEPTH_TEXTURE_FORMAT,
+            view_formats: &[],
+            size: Extent3d {
+                width: surface_config.width,
+                height: surface_config.height,
+                depth_or_array_layers: 1,
+            },
+            dimension: TextureDimension::D2,
+            mip_level_count: 1,
+            sample_count: 1,
+        })
+    }
     pub fn from_window(window: Rc<Window>) -> Self {
         let instance = Instance::new(&InstanceDescriptor {
             backends: Backends::VULKAN,
@@ -59,20 +75,7 @@ impl Renderer {
             width: window.inner_size().width,
             height: window.inner_size().height,
         };
-        let depth_texture = device.create_texture(&TextureDescriptor {
-            label: Some("Depth texture"),
-            usage: TextureUsages::RENDER_ATTACHMENT | TextureUsages::TEXTURE_BINDING,
-            format: Self::DEPTH_TEXTURE_FORMAT,
-            view_formats: &[],
-            size: Extent3d {
-                width: surface_config.width,
-                height: surface_config.height,
-                depth_or_array_layers: 1,
-            },
-            dimension: TextureDimension::D2,
-            mip_level_count: 1,
-            sample_count: 1,
-        });
+        let depth_texture = Self::create_depth_texture(&device, &surface_config);
 
         Self {
             instance,
@@ -84,12 +87,21 @@ impl Renderer {
             depth_texture,
         }
     }
+    pub fn resize(&mut self, new_width: u32, new_height: u32) {
+        if new_width == 0 || new_height == 0 {
+            return;
+        }
+        self.surface_config.width = new_width;
+        self.surface_config.width = new_height;
+        self.surface.configure(&self.device, &self.surface_config);
+        self.depth_texture = Self::create_depth_texture(&self.device, &self.surface_config);
+    }
     pub fn render(&self, on_render_pass: impl FnOnce(&mut RenderPass)) {
         self.surface.configure(&self.device, &self.surface_config);
-        
+
         let surface_texture = self.surface.get_current_texture().unwrap();
         let view = surface_texture.texture.create_view(&Default::default());
-        
+
         let depth_view = self.depth_texture.create_view(&Default::default());
 
         let mut encoder = self

@@ -1,7 +1,6 @@
 use crate::mesh::Mesh;
 use crate::mesh_pipeline::MeshPipeline;
 use crate::renderer::Renderer;
-use cgmath::vec3;
 use std::rc::Rc;
 use winit::dpi::PhysicalSize;
 use winit::event::WindowEvent;
@@ -27,18 +26,27 @@ impl Application {
         );
         let renderer = Renderer::from_window(Rc::clone(&window));
         let mesh_pipeline = MeshPipeline::new(&renderer);
-        let meshes = vec![Mesh::from_arrays(
-            &renderer,
-            &[
-                vec3(-0.5, 0.5, 0.0),
-                vec3(-0.5, -0.5, 0.0),
-                vec3(0.5, 0.5, 0.0),
-                vec3(0.5, 0.5, 0.0),
-                vec3(-0.5, -0.5, 0.0),
-                vec3(0.5, -0.5, 0.0),
-            ],
-            None,
-        )];
+        let meshes = vec![
+            Mesh::from_arrays(
+                &renderer,
+                &mesh_pipeline,
+                &[
+                    [0.5, 0.5, 0.5],
+                    [-0.5, 0.5, -0.5],
+                    [-0.5, -0.5, -0.5],
+                    [0.5, -0.5, 0.5],
+                ],
+                Some(&[0, 1, 2, 2, 3, 0]),
+                [1.0, 0.0, 0.0],
+            ),
+            Mesh::from_arrays(
+                &renderer,
+                &mesh_pipeline,
+                &[[0.0, 0.5, 0.0], [-0.5, -0.5, 0.5], [0.5, -0.5, -0.5]],
+                None,
+                [0.0, 1.0, 0.0],
+            ),
+        ];
         Self {
             renderer,
             window,
@@ -58,6 +66,7 @@ impl Application {
 
                 self.window.request_redraw();
             }
+            WindowEvent::Resized(new_size) => self.renderer.resize(new_size.width, new_size.height),
             WindowEvent::CloseRequested => {
                 event_loop.exit();
             }
