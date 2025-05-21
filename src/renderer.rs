@@ -19,7 +19,7 @@ impl Renderer {
             label: Some("Depth texture"),
             usage: TextureUsages::RENDER_ATTACHMENT | TextureUsages::TEXTURE_BINDING,
             format: Self::DEPTH_TEXTURE_FORMAT,
-            view_formats: &[],
+            view_formats: &[Self::DEPTH_TEXTURE_FORMAT],
             size: Extent3d {
                 width: surface_config.width,
                 height: surface_config.height,
@@ -32,7 +32,7 @@ impl Renderer {
     }
     pub fn from_window(window: Rc<Window>) -> Self {
         let instance = Instance::new(&InstanceDescriptor {
-            backends: Backends::VULKAN,
+            backends: Backends::all(),
             flags: InstanceFlags::debugging(),
             backend_options: Default::default(),
         });
@@ -48,14 +48,12 @@ impl Renderer {
             })
             .block_on()
             .unwrap();
+        println!("Chosen backend: {}", adapter.get_info().backend);
         let (device, queue) = adapter
-            .request_device(
-                &DeviceDescriptor {
-                    label: Some("request_device"),
-                    ..Default::default()
-                },
-                None,
-            )
+            .request_device(&DeviceDescriptor {
+                label: Some("request_device"),
+                ..Default::default()
+            })
             .block_on()
             .unwrap();
         let capabilities = surface.get_capabilities(&adapter);
@@ -97,8 +95,6 @@ impl Renderer {
         self.depth_texture = Self::create_depth_texture(&self.device, &self.surface_config);
     }
     pub fn render(&self, on_render_pass: impl FnOnce(&mut RenderPass)) {
-        self.surface.configure(&self.device, &self.surface_config);
-
         let surface_texture = self.surface.get_current_texture().unwrap();
         let view = surface_texture.texture.create_view(&Default::default());
 
